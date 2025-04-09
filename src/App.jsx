@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PostCard from './components/PostCard';
 import CreatePostPage from './pages/CreatePostPage';
 import PrivateRoute from './components/PrivateRoute';
-
+import RegisterPage from './pages/RegisterPage';
 const dummyPost = {
   title: "A Scenic Weekend in Coorg",
   excerpt: "Coorg is a beautiful hill station known for its lush greenery and coffee plantations.",
@@ -19,6 +19,11 @@ const App = () => (
           path="/"
           element={<PostCard post={dummyPost} />}
         />
+        
+
+        <Route 
+          path="/register" 
+          element={<RegisterPage />} />
         <Route
           path="/create"
           element={
