@@ -15,12 +15,12 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
   
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold mb-2 text-gray-100">{post.title}</h2>
-      <p className="text-gray-600 mb-4">{post.content}</p>
+      <h2 className="text-xl font-semibold mb-2 text-white">{post.title}</h2>
+      <p className="text-gray-300 mb-4">{post.content}</p>
       
       {post.category && (
         <div className="mb-2">
-          <span className="px-2 py-1 bg-blue-900/30 text-blue-200 text-sm rounded">
+          <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">
             {post.category}
           </span>
         </div>
@@ -29,14 +29,17 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {post.tags.map((tag, index) => (
-            <span key={index} className="px-2 py-1 bg-gray-800/50 text-gray-300 text-sm rounded">
-              {tag}
+            <span 
+              key={index} 
+              className="px-3 py-1 bg-gray-700/30 text-gray-300 rounded-full text-sm"
+            >
+              #{tag}
             </span>
           ))}
         </div>
       )}
 
-      <div className="flex justify-between items-center text-sm text-gray-400">
+      <div className="flex justify-between items-center pt-4 border-t border-gray-700/50">
         <span>By {authorName}</span>
         {isOwner && (
           <div className="flex gap-2">

@@ -14,6 +14,7 @@ export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,6 +59,17 @@ export default function HomePage() {
     }
   }, [location.state, isAuthenticated, navigate]);
 
+  useEffect(() => {
+    if (!posts) return;
+    
+    const filtered = posts.filter(post => {
+      const categoryMatch = !selectedCategory || post.category === selectedCategory;
+      const tagMatch = !selectedTag || (post.tags && post.tags.includes(selectedTag));
+      return categoryMatch && tagMatch;
+    });
+    
+    setFilteredPosts(filtered);
+  }, [posts, selectedCategory, selectedTag]);
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
@@ -103,13 +115,15 @@ export default function HomePage() {
   };
 
   const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-    setSelectedTag("");
+    const category = e.target.value;
+    setSelectedCategory(category);
+    setSelectedTag(""); // Reset tag when category changes
   };
 
   const handleTagChange = (e) => {
-    setSelectedTag(e.target.value);
-    setSelectedCategory("");
+    const tag = e.target.value;
+    setSelectedTag(tag);
+    setSelectedCategory(""); // Reset category when tag changes
   };
 
   const handleEdit = (postId) => {
@@ -225,15 +239,19 @@ export default function HomePage() {
               <h2 className="text-2xl font-semibold mb-4">Welcome to Blog App</h2>
               <p className="text-gray-300 text-lg">Please login or register to view and create posts.</p>
             </div>
-          ) : posts.length === 0 ? (
+          ) : filteredPosts.length === 0 ? (
             <div className="glass-card p-8 text-center animate-fade-in">
-              <p className="text-gray-600 text-lg mb-4">No posts found.</p>
-              <button
-                onClick={() => navigate('/create')}
-                className="text-blue-500 hover:text-blue-600 font-medium text-lg"
-              >
-                Create your first post
-              </button>
+              <p className="text-gray-300 text-lg mb-4">
+                {posts.length === 0 ? "No posts found." : "No posts match the selected filters."}
+              </p>
+              {posts.length === 0 && (
+                <button
+                  onClick={() => navigate('/create')}
+                  className="text-blue-500 hover:text-blue-600 font-medium text-lg"
+                >
+                  Create your first post
+                </button>
+              )}
             </div>
           ) : (
             <>
@@ -270,29 +288,23 @@ export default function HomePage() {
               )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {posts
-                  .filter(post => {
-                    if (selectedCategory && post.category !== selectedCategory) return false;
-                    if (selectedTag && (!post.tags || !post.tags.includes(selectedTag))) return false;
-                    return true;
-                  })
-                  .map(post => {
-                    const postAuthor = typeof post.author === 'object' ? post.author.username : String(post.author);
-                    const userString = typeof currentUser === 'object' ? currentUser.username : String(currentUser);
-                    
-                    return (
-                      <div key={post.id} className="glass-card animate-fade-in">
-                        <PostCard
-                          post={post}
-                          currentUser={userString}
-                          onDelete={() => deletePost(post.id)}
-                          onEdit={() => handleEdit(post.id)}
-                          isOwner={postAuthor === userString}
-                        />
-                      </div>
-                    );
-                  })}
-              </div>
+              {filteredPosts.map(post => {
+              const postAuthor = typeof post.author === 'object' ? post.author.username : String(post.author);
+              const userString = typeof currentUser === 'object' ? currentUser.username : String(currentUser);
+              
+              return (
+                <div key={post.id} className="glass-card animate-fade-in">
+                  <PostCard
+                    post={post}
+                    currentUser={userString}
+                    onDelete={() => deletePost(post.id)}
+                    onEdit={() => handleEdit(post.id)}
+                    isOwner={postAuthor === userString}
+                  />
+                </div>
+    );
+  })}
+</div>
             </>
           )}
         </div>

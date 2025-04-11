@@ -16,23 +16,23 @@ export default function EditPostPage() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        // First try to use the post from navigation state
         if (location.state?.post) {
           const { title, content, category, tags } = location.state.post;
-          setTitle(title);
-          setContent(content);
+          setTitle(title || '');
+          setContent(content || '');
           setCategory(category || '');
+          // Handle tags whether they're an array or string
           setTags(Array.isArray(tags) ? tags.join(', ') : tags || '');
           setLoading(false);
           return;
         }
-
-        // If no state, fetch from API
+  
         const response = await apiInstance.get(`/posts/${id}`);
         const post = response.data;
-        setTitle(post.title);
-        setContent(post.content);
+        setTitle(post.title || '');
+        setContent(post.content || '');
         setCategory(post.category || '');
+        // Handle tags whether they're an array or string
         setTags(Array.isArray(post.tags) ? post.tags.join(', ') : post.tags || '');
       } catch (error) {
         console.error('Error fetching post:', error);
@@ -40,21 +40,27 @@ export default function EditPostPage() {
       }
       setLoading(false);
     };
-
+  
     fetchPost();
   }, [id, location.state]);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const formattedTags = tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+  
       await apiInstance.put(`/posts/${id}`, {
         title,
         content,
-        category,
-        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        category: category.trim(),
+        tags: formattedTags
       });
-
+  
       navigate('/', {
         state: { 
           refresh: true,
@@ -67,7 +73,6 @@ export default function EditPostPage() {
     }
     setLoading(false);
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
