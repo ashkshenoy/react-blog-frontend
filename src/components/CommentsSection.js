@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import api from '../api/axios';
+import { apiInstance } from '../api/axios';
 
 export default function CommentsSection({ postId }) {
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
 
   useEffect(() => {
-    api.get(`/posts/${postId}/comments`)
-      .then(res => setComments(res.data));
-  }, [postId]);
+    apiInstance.get(`/posts/${postId}/comments`)
+        .then(res => setComments(res.data));
+}, [postId]);
 
-  const addComment = async () => {
-    await api.post(`/posts/${postId}/comments`, { content: text });
-    setText("");
-    const res = await api.get(`/posts/${postId}/comments`);
-    setComments(res.data);
-  };
+const addComment = async () => {
+  await apiInstance.post(`/posts/${postId}/comments`, { content: text });
+  setText("");
+  const res = await apiInstance.get(`/posts/${postId}/comments`);
+  setComments(res.data);
+};
 
   return (
     <div className="mt-4 border-t pt-2">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import api from '../api/axios';
+import apiInstance from '../api/axios';
 import { summarizeContent, generateTags } from "../api/aiService";
 
 export default function CreatePostPage() {
@@ -11,7 +11,7 @@ export default function CreatePostPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/posts", { title, content });
+      await apiInstance.post("/posts", { title, content });
       alert("Post created!");
     } catch (err) {
       alert("Error creating post");

@@ -1,25 +1,43 @@
-import axios from "axios";
+import axios from 'axios';
 
-const api = axios.create({
-  baseURL: "http://localhost:8080/api",
-  headers: {
-    "Content-Type": "application/json",
-  }
+const authApi = axios.create({
+    baseURL: 'http://localhost:8080/auth',
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
-// Add JWT token to headers if it exists
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token"); // Or wherever you're storing it
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+const apiInstance = axios.create({
+    baseURL: 'http://localhost:8080/api',
+    headers: {
+        'Content-Type': 'application/json'
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
+});
+
+// Add request interceptor for protected routes
+apiInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+            console.log('Adding auth header:', `Bearer ${token.substring(0, 20)}...`);
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
 );
 
-
-
-
-export default api;
+// Add response interceptor for handling auth errors
+apiInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 403) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+export { authApi, apiInstance };

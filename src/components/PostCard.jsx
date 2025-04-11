@@ -34,7 +34,7 @@ export default function PostCard({ post, currentUser, onDelete }) {
         </div>
       )}
 
-      //<CommentsSection postId={post.id} />
+      <CommentsSection postId={post.id} />
     </div>
   );
 }
