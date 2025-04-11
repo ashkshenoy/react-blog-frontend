@@ -1,36 +1,31 @@
 :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --accent-primary: #3b82f6;
-    --accent-hover: #2563eb;
-    --glass-bg: rgba(30, 41, 59, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --bg-primary: #0a1929;
+    --bg-secondary: #132f4c;
+    --glass-bg: rgba(10, 25, 41, 0.7);
+    --accent-blue: #42a5f5;
+    --accent-hover: #1976d2;
   }
   
   .app-background {
     background-color: var(--bg-primary);
     background-image: 
-      radial-gradient(at 47% 33%, hsla(222, 84%, 30%, 0.5) 0, transparent 59%), 
-      radial-gradient(at 82% 65%, hsla(222, 84%, 10%, 0.5) 0, transparent 55%);
+      radial-gradient(at 0% 0%, rgb(12, 74, 110) 0%, transparent 50%),
+      radial-gradient(at 100% 0%, rgb(79, 70, 229) 0%, transparent 50%);
     min-height: 100vh;
-    color: var(--text-primary);
   }
   
   .glass-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease-in-out;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .glass-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
   }
-  
   /* Form elements */
   input, select, textarea {
     background: var(--bg-secondary) !important;

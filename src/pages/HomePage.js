@@ -144,18 +144,22 @@ export default function HomePage() {
   }
 
   return (
-    <div className="app-background min-h-screen py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="glass-card p-6 mb-8 animate-fade-in">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold text-gray-100">Blog Posts</h1>
-              {isAuthenticated && currentUser && (
-                <span className="text-gray-300 text-lg">
-                  Welcome, <span className="font-medium">{currentUser}</span>
-                </span>
-              )}
-            </div>
+    <div className="app-background min-h-screen py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      {/* Header Section */}
+      <div className="glass-card p-8 mb-8 animate-fade-in rounded-xl">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent 
+                         bg-gradient-to-r from-blue-400 to-indigo-400">
+              Blog Posts
+            </h1>
+            {isAuthenticated && currentUser && (
+              <span className="text-gray-300 text-lg">
+                Welcome, <span className="font-medium text-blue-400">{currentUser}</span>
+              </span>
+            )}
+          </div>
             
             <div className="flex gap-4">
               {isAuthenticated && (
@@ -163,8 +167,9 @@ export default function HomePage() {
                   <button
                     onClick={fetchData}
                     disabled={loading}
-                    className="px-4 py-2 text-gray-300 hover:text-gray-100 
-                             transition-colors duration-200 flex items-center gap-2"
+                    className="px-4 py-2.5 text-gray-300 hover:text-white 
+                         transition-all duration-200 flex items-center gap-2
+                         hover:bg-white/10 rounded-lg"
                   >
                     <svg className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} 
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,8 +180,10 @@ export default function HomePage() {
                   </button>
                   <button
                     onClick={() => navigate('/create')}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
-                             transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="px-6 py-2.5 bg-blue-500/90 text-white rounded-lg 
+                         hover:bg-blue-600 transition-all duration-200 
+                         shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50
+                         hover:-translate-y-0.5"
                   >
                     New Post
                   </button>
@@ -186,15 +193,17 @@ export default function HomePage() {
                 <>
                   <button
                     onClick={() => navigate('/login')}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
-                             transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="px-6 py-2.5 bg-blue-500/90 text-white rounded-lg 
+                         hover:bg-blue-600 transition-all duration-200
+                         shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50
+                         hover:-translate-y-0.5"
                   >
                     Login
                   </button>
                   <button
                     onClick={() => navigate('/register')}
-                    className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg 
-                             hover:bg-gray-50 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="px-6 py-2.5 border border-white/20 text-gray-300 
+                         rounded-lg hover:bg-white/10 transition-all duration-200"
                   >
                     Register
                   </button>
@@ -229,8 +238,9 @@ export default function HomePage() {
           ) : (
             <>
               {categories.length > 0 && (
-                <div className="glass-card p-6 animate-fade-in">
-                  <h2 className="text-lg font-medium text-gray-200 mb-4">Filters</h2>
+                <div className="glass-card p-6 animate-fade-in rounded-xl mb-6">
+                  <h2 className="text-lg font-medium text-gray-200 mb-4 
+                     border-l-4 border-blue-500 pl-3">Filters</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <select
                       value={selectedCategory}
