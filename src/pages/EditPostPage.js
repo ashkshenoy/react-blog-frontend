@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import { apiInstance } from '../api/axios';
 
 export default function EditPostPage() {
   const { id } = useParams();
@@ -9,7 +9,7 @@ export default function EditPostPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get(`/posts/${id}`).then(res => {
+    apiInstance.get(`/posts/${id}`).then(res => {
       setTitle(res.data.title);
       setContent(res.data.content);
     });
@@ -17,7 +17,7 @@ export default function EditPostPage() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    await api.put(`/posts/${id}`, { title, content });
+    await apiInstance.put(`/posts/${id}`, { title, content });
     navigate("/");
   };
 

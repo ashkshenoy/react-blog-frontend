@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import apiInstance from '../api/axios';
+import  {apiInstance} from '../api/axios';
 import { summarizeContent, generateTags } from "../api/aiService";
 
 export default function CreatePostPage() {
@@ -26,14 +26,13 @@ export default function CreatePostPage() {
 
         setSummary(summaryResult);
         setTags(tagsResult);
-      const res = await api.post("/ai/generate", { title, content });
-      setContent(res.data.generatedContent);
+        const res = await apiInstance.post("/ai/generate", { title, content }); // Change api to apiInstance
+        setContent(res.data.generatedContent);
     } catch {
-      alert("AI failed");
+        alert("AI failed");
     }
     setAiGenerating(false);
-  };
-
+};
   return (
     <div className="max-w-xl mx-auto mt-6 p-4 border rounded shadow">
       <h2 className="text-xl font-bold mb-4">Create New Post</h2>

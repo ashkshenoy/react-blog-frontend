@@ -1,6 +1,6 @@
 // src/pages/HomePage.jsx
 import { useEffect, useState } from 'react';
-import apiInstance from '../api/axios';
+import {apiInstance} from '../api/axios';
 import PostCard from '../components/PostCard';
 import { useNavigate } from 'react-router-dom';
 export default function HomePage() {
@@ -14,86 +14,114 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Update the auth checking useEffect
-// Auth check useEffect
-useEffect(() => {
-  const checkAuth = async () => {
-    console.log("=== Auth Check ===");
-    const token = localStorage.getItem("token");
-    
-    if (!token) {
-      console.log("No token found - redirecting to login");
-      setCurrentUser(null);
-      setIsAuthenticated(false);
-      navigate('/login');
-      return;
-    }
 
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) throw new Error('Invalid token format');
+  useEffect(() => {
+    let isMounted = true;  // Add mounted flag
 
-      const payload = JSON.parse(atob(parts[1]));
-      if (payload.exp && payload.exp * 1000 < Date.now()) {
-        throw new Error('Token expired');
-      }
-
-      setCurrentUser(payload.sub);
-      setIsAuthenticated(true);
-      console.log("User authenticated:", payload.sub);
-    } catch (error) {
-      console.error("Auth error:", error.message);
-      localStorage.removeItem("token");
-      setCurrentUser(null);
-      setIsAuthenticated(false);
-      navigate('/login');
-    }
-  };
-
-  checkAuth();
-}, [navigate]);
-
-// Update the posts fetching useEffect
-useEffect(() => {
-  if (!isAuthenticated) return;
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // Fetch posts
-      let url = "posts";
-      if (selectedCategory) url = `posts/category/${selectedCategory}`;
-      else if (selectedTag) url = `posts/tag/${selectedTag}`;
+    const checkAuth = async () => {
+      console.log("=== Auth Check ===");
+      const token = localStorage.getItem("token");
       
-      const [postsRes, categoriesRes, tagsRes] = await Promise.all([
-        apiInstance.get(url),
-        apiInstance.get("categories"),
-        apiInstance.get("tags")
-    ]);
-
-      setPosts(postsRes.data);
-      setCategories(categoriesRes.data);
-      setTags(tagsRes.data);
-    } catch (error) {
-      console.error("Data fetch error:", error);
-      if (error.response?.status === 401) {
+      if (!token && isMounted) {
+        console.log("No token found - redirecting to login");
+        setCurrentUser(null);
         setIsAuthenticated(false);
         navigate('/login');
+        return;
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchData();
-}, [isAuthenticated, selectedCategory, selectedTag, navigate]);
-  // Load current user from JWT token
- 
 
-  // Fetch categories and tags once at component mount
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) throw new Error('Invalid token format');
+
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          throw new Error('Token expired');
+        }
+
+        if (isMounted) {
+          setCurrentUser(payload.sub);
+          setIsAuthenticated(true);
+          console.log("User authenticated:", payload.sub);
+          await fetchData();  // Wait for data fetch
+        }
+      } catch (error) {
+        console.error("Auth error:", error.message);
+        localStorage.removeItem("token");
+        if (isMounted) {
+          setCurrentUser(null);
+          setIsAuthenticated(false);
+          navigate('/login');
+        }
+      }
+    };
+
+    checkAuth();
+
+    return () => {
+      isMounted = false;  // Cleanup on unmount
+    };
+  }, [navigate]);
+
+  const fetchData = async () => {
+    if (!isAuthenticated) return;
+    
+    setLoading(true);
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setIsAuthenticated(false);
+            navigate('/login');
+            return;
+        }
+
+        // Update URLs to match backend endpoints
+        let url = "/posts";  // Base URL from BlogPostController
+        if (selectedCategory) url = `/api/posts/category/${selectedCategory}`;
+        else if (selectedTag) url = `/api/posts/tag/${selectedTag}`;
+
+        // For now, just fetch posts since we don't have category/tag endpoints
+        const postsRes = await apiInstance.get(url);
+
+        if (postsRes?.data) {
+            setPosts(postsRes.data);
+            console.log('Posts fetched successfully');
+            
+            // Extract unique categories and tags from posts
+            const uniqueCategories = [...new Set(postsRes.data
+                .filter(post => post.category)
+                .map(post => post.category))];
+            
+            const uniqueTags = [...new Set(postsRes.data
+                .flatMap(post => post.tags || []))];
+            
+            setCategories(uniqueCategories);
+            setTags(uniqueTags);
+        }
+    } catch (error) {
+        console.error("Data fetch error:", {
+            status: error.response?.status,
+            message: error.message
+        });
+        
+        if (error.response?.status === 403 || error.response?.status === 401) {
+            setIsAuthenticated(false);
+            localStorage.removeItem('token');
+            navigate('/login');
+        }
+    } finally {
+        setLoading(false);
+    }
+};
+  // Remove duplicate useEffect for categories and tags
   useEffect(() => {
-    apiInstance.get("categories").then(res => setCategories(res.data));
-    apiInstance.get("tags").then(res => setTags(res.data));
-  }, [currentUser]);
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated, selectedCategory, selectedTag]);
+
+  // ...rest of your component code...
+
 
   // Handler for when a category is selected
   const handleCategoryChange = (e) => {
