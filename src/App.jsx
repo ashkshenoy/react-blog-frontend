@@ -7,7 +7,8 @@ import RegisterPage from './pages/RegisterPage';
 import CreatePostPage from './pages/CreatePostPage';
 import EditPostPage from './pages/EditPostPage';
 import PrivateRoute from './components/PrivateRoute';
-
+import './index.css';
+import './styles/maincss.css';
 const App = () => (
   <Router>
     <div className="min-h-screen bg-gray-50">

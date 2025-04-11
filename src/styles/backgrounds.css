@@ -1,0 +1,61 @@
+:root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-primary: #3b82f6;
+    --accent-hover: #2563eb;
+    --glass-bg: rgba(30, 41, 59, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.05);
+  }
+  
+  .app-background {
+    background-color: var(--bg-primary);
+    background-image: 
+      radial-gradient(at 47% 33%, hsla(222, 84%, 30%, 0.5) 0, transparent 59%), 
+      radial-gradient(at 82% 65%, hsla(222, 84%, 10%, 0.5) 0, transparent 55%);
+    min-height: 100vh;
+    color: var(--text-primary);
+  }
+  
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Form elements */
+  input, select, textarea {
+    background: var(--bg-secondary) !important;
+    border-color: var(--glass-border) !important;
+    color: var(--text-primary) !important;
+  }
+  
+  input::placeholder, select::placeholder, textarea::placeholder {
+    color: var(--text-secondary) !important;
+  }
+  
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }

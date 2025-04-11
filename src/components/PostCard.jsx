@@ -15,12 +15,12 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
   
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
+      <h2 className="text-xl font-semibold mb-2 text-gray-100">{post.title}</h2>
       <p className="text-gray-600 mb-4">{post.content}</p>
       
       {post.category && (
         <div className="mb-2">
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded">
+          <span className="px-2 py-1 bg-blue-900/30 text-blue-200 text-sm rounded">
             {post.category}
           </span>
         </div>
@@ -29,26 +29,26 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {post.tags.map((tag, index) => (
-            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded">
+            <span key={index} className="px-2 py-1 bg-gray-800/50 text-gray-300 text-sm rounded">
               {tag}
             </span>
           ))}
         </div>
       )}
 
-      <div className="flex justify-between items-center text-sm text-gray-500">
+      <div className="flex justify-between items-center text-sm text-gray-400">
         <span>By {authorName}</span>
         {isOwner && (
           <div className="flex gap-2">
             <button
               onClick={() => onEdit(post.id)}
-              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-3 py-1 bg-blue-600 text-gray-100 rounded hover:bg-blue-700"
             >
               Edit
             </button>
             <button
                onClick={handleDelete}
-              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              className="px-3 py-1 bg-red-600 text-gray-100 rounded hover:bg-red-700"
             >
               Delete
             </button>
