@@ -9,7 +9,9 @@ export default function PostCard({ post, currentUser, onDelete }) {
   return (
     <div className="border p-4 rounded shadow">
       <h2 className="text-lg font-semibold">{post.title}</h2>
-      <p className="text-gray-600 mb-2">{post.content.substring(0, 100)}...</p>
+      <p className="text-gray-600 mb-2">
+  {(post.content || "No content available").substring(0, 100)}...
+</p>
 
       <p className="text-sm text-blue-600 mb-2">
         Tags: {post.tags?.map(t => t.name).join(", ")}
@@ -32,7 +34,7 @@ export default function PostCard({ post, currentUser, onDelete }) {
         </div>
       )}
 
-      <CommentsSection postId={post.id} />
+      //<CommentsSection postId={post.id} />
     </div>
   );
 }

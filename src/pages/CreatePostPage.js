@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import api from '../api/axios';
+import { summarizeContent, generateTags } from "../api/aiService";
 
 export default function CreatePostPage() {
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(''); 
   const [content, setContent] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
-
+  const [summary, setSummary] = useState("");
+  const [tags, setTags] = useState([]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -19,6 +21,11 @@ export default function CreatePostPage() {
   const handleAIGenerate = async () => {
     setAiGenerating(true);
     try {
+        const summaryResult = await summarizeContent(content);
+        const tagsResult = await generateTags(content);
+
+        setSummary(summaryResult);
+        setTags(tagsResult);
       const res = await api.post("/ai/generate", { title, content });
       setContent(res.data.generatedContent);
     } catch {
@@ -53,6 +60,19 @@ export default function CreatePostPage() {
           >
             {aiGenerating ? "Generating..." : "Use AI"}
           </button>
+          {summary && (
+          <div className="bg-gray-100 p-3 rounded mt-2">
+            <strong>Suggested Summary:</strong>
+            <p>{summary}</p>
+          </div>
+        )}
+
+        {tags.length > 0 && (
+          <div className="bg-gray-100 p-3 rounded mt-2">
+            <strong>Suggested Tags:</strong>
+            <p>{tags.join(", ")}</p>
+          </div>
+        )}
           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
             Publish
           </button>
