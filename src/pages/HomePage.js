@@ -17,6 +17,9 @@ export default function HomePage() {
   const [filteredPosts, setFilteredPosts] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(6);
+  const [totalPages, setTotalPages] = useState(0);
 
   // Check auth status and fetch posts on mount and auth state changes
   useEffect(() => {
@@ -79,7 +82,47 @@ export default function HomePage() {
     setTags([]);
     setError(null);
   };
+  
+  useEffect(() => {
+    // Calculate total pages based on filtered posts
+    setTotalPages(Math.ceil(filteredPosts.length / postsPerPage));
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [filteredPosts, postsPerPage]);
 
+  const getCurrentPosts = () => {
+    const indexOfLastPost = currentPage * postsPerPage;
+    const indexOfFirstPost = indexOfLastPost - postsPerPage;
+    return filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  };
+
+  const PaginationControls = () => {
+    return (
+      <div className="flex justify-center items-center gap-2 mt-8">
+        <button
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 text-gray-300 hover:text-white 
+                   transition-all duration-200 disabled:opacity-50
+                   hover:bg-white/10 rounded-lg"
+        >
+          Previous
+        </button>
+        <span className="text-gray-300">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 text-gray-300 hover:text-white 
+                   transition-all duration-200 disabled:opacity-50
+                   hover:bg-white/10 rounded-lg"
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
   const fetchData = async () => {
     if (!isAuthenticated) return;
     
@@ -89,31 +132,41 @@ export default function HomePage() {
       const postsRes = await apiInstance.get("/posts");
       
       if (postsRes?.data) {
-        setPosts(postsRes.data);
+        // Transform posts to include category and tags
+        const transformedPosts = postsRes.data.map(post => ({
+          ...post,
+          // Use categoryName if available, fallback to finding category by ID
+          category: post.categoryName || post.category || '',
+          // Use tagNames if available, fallback to finding tags by IDs
+          tags: post.tagNames || post.tags || []
+        }));
+  
+        console.log('Transformed posts:', transformedPosts);
+        setPosts(transformedPosts);
         
-        const uniqueCategories = [...new Set(postsRes.data
-          .filter(post => post.category)
+        // Extract unique categories and tags
+        const uniqueCategories = [...new Set(transformedPosts
+          .filter(post => post.category && post.category.trim())
           .map(post => post.category))];
         
-        const uniqueTags = [...new Set(postsRes.data
-          .flatMap(post => post.tags || []))];
+        const uniqueTags = [...new Set(transformedPosts
+          .flatMap(post => Array.isArray(post.tags) ? post.tags : [])
+          .filter(tag => tag && tag.trim()))];
+        
+        console.log('Extracted categories:', uniqueCategories);
+        console.log('Extracted tags:', uniqueTags);
         
         setCategories(uniqueCategories);
         setTags(uniqueTags);
+        setFilteredPosts(transformedPosts);
       }
     } catch (error) {
-      console.error("Data fetch error:", error);
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        handleLogout();
-        setError("Session expired. Please login again.");
-      } else {
-        setError("Failed to load posts. Please try again.");
-      }
+      console.error("Error fetching posts:", error);
+      setError("Failed to load posts");
     } finally {
       setLoading(false);
     }
   };
-
   const handleCategoryChange = (e) => {
     const category = e.target.value;
     setSelectedCategory(category);
@@ -254,58 +307,65 @@ export default function HomePage() {
               )}
             </div>
           ) : (
-            <>
-              {categories.length > 0 && (
-                <div className="glass-card p-6 animate-fade-in rounded-xl mb-6">
-                  <h2 className="text-lg font-medium text-gray-200 mb-4 
-                     border-l-4 border-blue-500 pl-3">Filters</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <select
-                      value={selectedCategory}
-                      onChange={handleCategoryChange}
-                      className="p-2 border rounded-lg w-full bg-gray-800/50 backdrop-blur-sm 
-           text-gray-200 border-gray-700"
-                    >
-                      <option value="">All Categories</option>
-                      {categories.map((category, index) => (
-                        <option key={index} value={category}>{category}</option>
-                      ))}
-                    </select>
+            // Replace your existing grid section with this
+<>
+  {categories.length > 0 && (
+    <div className="glass-card p-6 animate-fade-in rounded-xl mb-6">
+      <h2 className="text-lg font-medium text-gray-200 mb-4 
+                   border-l-4 border-blue-500 pl-3">
+        Tags
+      </h2>
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setSelectedTag("")}
+          className={`px-3 py-1 rounded-full text-sm transition-all duration-200
+                    ${!selectedTag 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'}`}
+        >
+          All
+        </button>
+        {tags.map((tag, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedTag(tag)}
+            className={`px-3 py-1 rounded-full text-sm transition-all duration-200
+                      ${selectedTag === tag 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'}`}
+          >
+            #{tag}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+              
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {getCurrentPosts().map(post => {
+      const postAuthor = typeof post.author === 'object' 
+        ? post.author.username 
+        : String(post.author);
+      const userString = typeof currentUser === 'object' 
+        ? currentUser.username 
+        : String(currentUser);
+      
+      return (
+        <div key={post.id} className="glass-card animate-fade-in">
+          <PostCard
+            post={post}
+            currentUser={userString}
+            onDelete={() => deletePost(post.id)}
+            onEdit={() => handleEdit(post.id)}
+            isOwner={postAuthor === userString}
+          />
+        </div>
+      );
+    })}
+  </div>
 
-                    <select
-                      value={selectedTag}
-                      onChange={handleTagChange}
-                      className="p-2 border rounded-lg w-full bg-gray-800/50 backdrop-blur-sm 
-           text-gray-200 border-gray-700"
-                    >
-                      <option value="">All Tags</option>
-                      {tags.map((tag, index) => (
-                        <option key={index} value={tag}>{tag}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredPosts.map(post => {
-              const postAuthor = typeof post.author === 'object' ? post.author.username : String(post.author);
-              const userString = typeof currentUser === 'object' ? currentUser.username : String(currentUser);
-              
-              return (
-                <div key={post.id} className="glass-card animate-fade-in">
-                  <PostCard
-                    post={post}
-                    currentUser={userString}
-                    onDelete={() => deletePost(post.id)}
-                    onEdit={() => handleEdit(post.id)}
-                    isOwner={postAuthor === userString}
-                  />
-                </div>
-    );
-  })}
-</div>
-            </>
+  {totalPages > 1 && <PaginationControls />}
+</>
           )}
         </div>
       </div>

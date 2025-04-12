@@ -16,24 +16,32 @@ export default function CreatePostPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
-      const response = await apiInstance.post('/posts', {
+      // Format tags before sending
+      const formattedTags = tags.split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+      
+      // Create post data object
+      const postData = {
         title,
         content,
-        category,
-        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-      });
+        category: category.trim(),
+        tags: formattedTags,
+        // Add these fields explicitly
+        categoryName: category.trim(),
+        tagNames: formattedTags
+      };
+  
+      console.log('Submitting post:', postData);
+  
+      const response = await apiInstance.post('/posts', postData);
+      console.log('Created post response:', response.data);
       
-      if (response.status === 201 || response.status === 200) {
-        // Force an immediate refresh when redirecting to home
-        navigate('/', { 
-          state: { 
-            refresh: true,
-            message: 'Post created successfully!' 
-          },
-          replace: true  // Replace current history entry
-        });
-      }
+      navigate('/', { 
+        state: { refresh: true }
+      });
     } catch (error) {
       console.error('Error creating post:', error);
       setError(error.response?.data?.message || 'Failed to create post');
@@ -41,7 +49,6 @@ export default function CreatePostPage() {
       setLoading(false);
     }
   };
-
   const handleAIGenerate = async () => {
     setAiGenerating(true);
     try {
@@ -60,67 +67,90 @@ export default function CreatePostPage() {
     }
   };
 
-  return (
-    <div className="max-w-xl mx-auto mt-6 p-4 border rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Create New Post</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          className="w-full p-2 border rounded"
-          placeholder="Title"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-        />
-        <textarea
-          rows="8"
-          className="w-full p-2 border rounded"
-          placeholder="Content"
-          value={content}
-          onChange={e => setContent(e.target.value)}
-        />
-        <input
-          className="w-full p-2 border rounded"
-          placeholder="Category"
-          value={category}
-          onChange={e => setCategory(e.target.value)}
-        />
-        <input
-          className="w-full p-2 border rounded"
-          placeholder="Tags (comma-separated)"
-          value={tags}
-          onChange={e => setTags(e.target.value)}
-        />
-        <div className="flex gap-4">
-          <button
-            type="button"
-            className="bg-purple-500 text-white px-4 py-2 rounded disabled:opacity-50"
-            onClick={handleAIGenerate}
-            disabled={aiGenerating || !content}
-          >
-            {aiGenerating ? "Generating..." : "Use AI"}
-          </button>
-          <button 
-            type="submit" 
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-            disabled={loading || !title || !content}
-          >
-            {loading ? "Publishing..." : "Publish"}
-          </button>
-        </div>
-      </form>
+  // ...existing imports...
 
-      {summary && (
-        <div className="bg-gray-100 p-3 rounded mt-4">
-          <strong>Suggested Summary:</strong>
-          <p>{summary}</p>
+return (
+  <div className="app-background min-h-screen py-12">
+  <div className="max-w-2xl mx-auto px-4">
+    <div className="glass-card p-8 rounded-xl animate-fade-in">
+      <h2 className="text-2xl font-bold text-white mb-6">Create New Post</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-gray-300 mb-2">Title</label>
+          <input
+            className="w-full p-3 bg-white/10 border border-gray-700 rounded-lg 
+                     text-white placeholder-gray-400/80 focus:outline-none 
+                     focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                     hover:bg-white/20 transition-colors duration-200"
+            placeholder="What's on your mind?"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
         </div>
-      )}
 
-      {suggestedTags.length > 0 && (
-        <div className="bg-gray-100 p-3 rounded mt-4">
-          <strong>Suggested Tags:</strong>
-          <p>{suggestedTags.join(", ")}</p>
+        <div>
+          <label className="block text-gray-300 mb-2">Content</label>
+          <textarea
+            rows="8"
+            className="w-full p-3 bg-white/10 border border-gray-700 rounded-lg 
+                     text-white placeholder-gray-400/80 focus:outline-none 
+                     focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                     hover:bg-white/20 transition-colors duration-200"
+            placeholder="Write your story here..."
+            value={content}
+            onChange={e => setContent(e.target.value)}
+          />
         </div>
-      )}
+
+        <div>
+          <label className="block text-gray-300 mb-2">Category</label>
+          <input
+            className="w-full p-3 bg-white/10 border border-gray-700 rounded-lg 
+                     text-white placeholder-gray-400/80 focus:outline-none 
+                     focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                     hover:bg-white/20 transition-colors duration-200"
+            placeholder="e.g. Technology, Travel, Food..."
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-300 mb-2">Tags</label>
+          <input
+            className="w-full p-3 bg-white/10 border border-gray-700 rounded-lg 
+                     text-white placeholder-gray-400/80 focus:outline-none 
+                     focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                     hover:bg-white/20 transition-colors duration-200"
+            placeholder="web, coding, react (comma-separated)"
+            value={tags}
+            onChange={e => setTags(e.target.value)}
+          />
+        </div>
+
+          <div className="flex gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="px-6 py-2.5 border border-gray-600 text-gray-300 rounded-lg 
+                       hover:bg-white/5 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-blue-500/90 text-white rounded-lg 
+                       hover:bg-blue-600 transition-all duration-200 
+                       shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50
+                       hover:-translate-y-0.5"
+              disabled={loading}
+            >
+              {loading ? 'Creating...' : 'Create Post'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  );
+  </div>
+);
 }
