@@ -16,29 +16,25 @@ export default function CreatePostPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+  
     try {
       // Format tags before sending
       const formattedTags = tags.split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
       
-      // Create post data object
       const postData = {
         title,
         content,
         category: category.trim(),
-        tags: formattedTags,
-        // Add these fields explicitly
-        categoryName: category.trim(),
-        tagNames: formattedTags
+        tags: formattedTags
       };
   
-      console.log('Submitting post:', postData);
+      console.log('Submitting post data:', postData); // Debug log
   
       const response = await apiInstance.post('/posts', postData);
-      console.log('Created post response:', response.data);
-      
+      console.log('Server response:', response.data); // Debug log
+  
       navigate('/', { 
         state: { refresh: true }
       });
