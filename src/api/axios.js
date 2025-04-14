@@ -30,19 +30,15 @@ apiInstance.interceptors.request.use(
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
-            console.log('Request with token:', {
+            console.log('Request config:', {
                 url: config.url,
                 method: config.method,
-                tokenPrefix: token.substring(0, 20) + '...'
+                headers: config.headers
             });
         }
-        return config;
+        return config;  // Make sure to return the config
     },
-    (error) => {
-        // Add error handling for request errors
-        console.error('Request error:', error);
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 apiInstance.interceptors.response.use(
     (response) => {

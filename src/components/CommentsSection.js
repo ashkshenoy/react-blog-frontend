@@ -11,7 +11,19 @@ export default function CommentsSection({ postId }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await apiInstance.delete(`/posts/${postId}/comments/${commentId}`);
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      if (err.response?.status === 403) {
+        navigate('/login', { state: { from: window.location.pathname } });
+      } else {
+        setError('Failed to delete comment');
+      }
+    }
+  };
   const fetchComments = async () => {
     try {
       const response = await apiInstance.get(`/posts/${postId}/comments`);
@@ -117,6 +129,7 @@ export default function CommentsSection({ postId }) {
           <CommentCard
             key={comment.id}
             comment={comment}
+            onDelete={handleDeleteComment} 
             currentUser={currentUser}
           />
         ))}

@@ -17,9 +17,14 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
   };
 
   // Initialize likes state when post changes
-  useEffect(() => {
-    setLikes(post.likes?.length || 0);
-    setHasLiked(post.likes?.some(like => like.user?.username === currentUser));
+     // Update likes state when post changes
+     useEffect(() => {
+      if (post?.likes) {
+          setLikes(post.likes.length);
+          setHasLiked(post.likes.some(like => 
+              like.user?.username === currentUser
+          ));
+      }
   }, [post, currentUser]);
 
   const handleLike = async () => {
@@ -34,43 +39,53 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
         return;
     }
 
-    // Store previous state for rollback
-    const previousLikes = likes;
-    const previousHasLiked = hasLiked;
-    
-    try {
-        // Optimistic update
-        setHasLiked(!hasLiked);
-        setLikes(prev => hasLiked ? prev - 1 : prev + 1);
+    const prevLikes = likes;
+    const prevHasLiked = hasLiked;
 
-        const response = await apiInstance[hasLiked ? 'delete' : 'post'](
-            `/posts/${post.id}/likes`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+    try {
+        // Use consistent request config format
+        const config = {
+            method: hasLiked ? 'DELETE' : 'POST',
+            url: `/posts/${post.id}/likes`,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
-        );
-        
-        // Update with server response
+        };
+
+        console.log('Making like request:', {
+            ...config,
+            token: token.substring(0, 20) + '...',
+            currentUser
+        });
+
+        const response = await apiInstance(config);
+
+        console.log('Like response:', response.data);
+
         if (response.data) {
             setLikes(response.data.totalLikes);
             setHasLiked(response.data.hasLiked);
         }
     } catch (error) {
-        console.error('Like operation failed:', error);
-        // Rollback on error
-        setLikes(previousLikes);
-        setHasLiked(previousHasLiked);
+        setLikes(prevLikes);
+        setHasLiked(prevHasLiked);
+        
+        console.error('Like operation failed:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message,
+            headers: error.response?.headers
+        });
         
         if (error.response?.status === 403) {
-            console.log('Auth token:', token); // Debug log
+            if (error.response.data?.message?.includes('expired')) {
+                localStorage.removeItem('token');
+            }
             navigate('/login', { state: { from: window.location.pathname } });
         }
     }
 };
-
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-2 text-white">{post.title}</h2>

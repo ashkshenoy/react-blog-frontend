@@ -76,7 +76,7 @@ const RegisterPage = () => {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded-xl border">
       <h2 className="text-2xl font-bold mb-4">Register</h2>
-      {error && (
+      {error && ( 
         <div className="mb-4 p-2 text-red-600 bg-red-50 rounded border border-red-200">
           {error}
         </div>
