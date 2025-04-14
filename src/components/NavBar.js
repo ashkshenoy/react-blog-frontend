@@ -1,56 +1,63 @@
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-export default function NavBar() {
-  const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem('token');
-  const username = isAuthenticated ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).sub : null;
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-    window.location.reload(); // Force refresh to update auth state
-  };
+const NavBar = () => {
+  const { currentUser, logout } = useAuth();
 
   return (
-    <nav className="bg-white shadow-sm">
+    <nav className="bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-xl font-bold text-gray-900">
-            Blog App
-          </Link>
+        <div className="flex items-center justify-between h-16">
+          {/* Left side */}
+          <div className="flex items-center gap-6">
+            <Link to="/" className="text-white font-bold text-xl">
+              Blog
+            </Link>
+            {currentUser && (
+              <Link 
+                to="/create" 
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Create Post
+              </Link>
+            )}
+          </div>
 
+          {/* Right side */}
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
+            {currentUser ? (
               <>
-                <span className="text-sm text-gray-600">
-                  Welcome, <span className="font-medium">{username}</span>
-                </span>
+                <span className="text-gray-300">Welcome, {currentUser}</span>
                 <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                  onClick={logout}
+                  className="px-4 py-2 text-gray-300 hover:text-white 
+                           hover:bg-gray-700 rounded-md transition-colors"
                 >
                   Logout
                 </button>
               </>
             ) : (
-              <div className="flex gap-2">
-                <Link
+              <>
+                <Link 
                   to="/login"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="text-gray-300 hover:text-white transition-colors"
                 >
                   Login
                 </Link>
-                <Link
+                <Link 
                   to="/register"
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                  className="px-4 py-2 text-white bg-blue-500 
+                           hover:bg-blue-600 rounded-md transition-colors"
                 >
                   Register
                 </Link>
-              </div>
+              </>
             )}
           </div>
         </div>
       </div>
     </nav>
   );
-}
+};
+
+export default NavBar;

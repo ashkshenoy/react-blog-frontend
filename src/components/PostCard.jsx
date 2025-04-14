@@ -1,5 +1,6 @@
 import { useEffect,useState } from 'react';
 import { apiInstance } from '../api/axios';
+import { useNavigate } from 'react-router-dom';
 import CommentsSection from './CommentsSection';
 
 export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner }) {
@@ -8,6 +9,7 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
   const [hasLiked, setHasLiked] = useState(
     post.likes?.some(like => like.user?.username === currentUser)
   );
+  const navigate = useNavigate();
   const getAuthorName = (author) => {
     if (!author) return 'Unknown';
     if (typeof author === 'string') return author;
@@ -22,33 +24,52 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
 
   const handleLike = async () => {
     if (!currentUser) {
-      navigate('/login', { state: { from: window.location.pathname } });
-      return;
+        navigate('/login', { state: { from: window.location.pathname } });
+        return;
     }
-  
-    // Optimistic update
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        navigate('/login', { state: { from: window.location.pathname } });
+        return;
+    }
+
+    // Store previous state for rollback
     const previousLikes = likes;
     const previousHasLiked = hasLiked;
-    setHasLiked(!hasLiked);
-    setLikes(prev => hasLiked ? prev - 1 : prev + 1);
-  
+    
     try {
-      if (hasLiked) {
-        await apiInstance.delete(`/posts/${post.id}/likes`);
-      } else {
-        await apiInstance.post(`/posts/${post.id}/likes`);
-      }
+        // Optimistic update
+        setHasLiked(!hasLiked);
+        setLikes(prev => hasLiked ? prev - 1 : prev + 1);
+
+        const response = await apiInstance[hasLiked ? 'delete' : 'post'](
+            `/posts/${post.id}/likes`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        
+        // Update with server response
+        if (response.data) {
+            setLikes(response.data.totalLikes);
+            setHasLiked(response.data.hasLiked);
+        }
     } catch (error) {
-      console.error('Error toggling like:', error);
-      // Revert optimistic update on error
-      setLikes(previousLikes);
-      setHasLiked(previousHasLiked);
-      
-      if (error.response?.status === 403) {
-        navigate('/login', { state: { from: window.location.pathname } });
-      }
+        console.error('Like operation failed:', error);
+        // Rollback on error
+        setLikes(previousLikes);
+        setHasLiked(previousHasLiked);
+        
+        if (error.response?.status === 403) {
+            console.log('Auth token:', token); // Debug log
+            navigate('/login', { state: { from: window.location.pathname } });
+        }
     }
-  };
+};
 
   return (
     <div className="p-6">

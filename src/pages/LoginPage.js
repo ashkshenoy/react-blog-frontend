@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '../api/axios'; // Remove duplicate import
+import { authApi } from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -8,6 +9,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,46 +17,41 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-        const response = await authApi.post('/login', {
-            username,
-            password
-        });
+      const response = await authApi.post('/login', {
+        username,
+        password
+      });
 
-        const token = response.data;
-        
-        if (token) {
-            localStorage.setItem('token', token);
-            const storedToken = localStorage.getItem('token');
-            
-            if (storedToken) {
-                console.log('Auth token stored successfully');
-                navigate('/');
-            } else {
-                throw new Error('Failed to store token');
-            }
-        } else {
-            throw new Error('No token received from server');
-        }
+      const token = response.data;
+      
+      if (token) {
+        // Use the login function from AuthContext instead of direct localStorage manipulation
+        login(token, username);
+        navigate('/');
+      } else {
+        throw new Error('No token received from server');
+      }
     } catch (error) {
-        console.error('Login error:', error.message);
-        setError(error.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', error.message);
+      setError(error.response?.data?.message || 'Login failed. Please try again.');
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-xl">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Login</h2>
       {error && (
-        <div className="mb-4 p-2 text-red-600 bg-red-50 rounded border border-red-200">
+        <div className="mb-4 p-3 text-red-200 bg-red-900/50 rounded-lg border border-red-500/50">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
+      <input
           type="text"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-white text-gray-800 placeholder-gray-500 
+                   focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           placeholder="Username"
           value={username}
           onChange={e => setUsername(e.target.value)}
@@ -63,7 +60,8 @@ export default function LoginPage() {
         />
         <input
           type="password"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-white text-gray-800 placeholder-gray-500
+                   focus:border-white-500 focus:ring-1 focus:ring-blue-500"
           placeholder="Password"
           value={password}
           onChange={e => setPassword(e.target.value)}
@@ -71,11 +69,12 @@ export default function LoginPage() {
           required
         />
         <button 
-          className={`w-full px-4 py-2 rounded text-white ${
-            loading 
-              ? 'bg-blue-300 cursor-not-allowed' 
-              : 'bg-blue-500 hover:bg-blue-600'
-          }`}
+          className={`w-full px-4 py-3 rounded-lg text-white 
+                     ${loading 
+                       ? 'bg-blue-500/50 cursor-not-allowed' 
+                       : 'bg-blue-500/90 hover:bg-blue-600 transition-all duration-200'
+                     } shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50
+                     hover:-translate-y-0.5`}
           type="submit"
           disabled={loading}
         >
