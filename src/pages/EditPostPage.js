@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiInstance } from '../api/axios';
+import { summarizeContent, generateTags } from "../api/aiService";
 
 export default function EditPostPage() {
   const [title, setTitle] = useState('');
@@ -11,6 +12,11 @@ export default function EditPostPage() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { id } = useParams();
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [suggestedTags, setSuggestedTags] = useState([]);
+
+
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -29,7 +35,23 @@ export default function EditPostPage() {
 
     fetchPost();
   }, [id]);
-
+   const handleAIGenerate = async () => {
+      setAiGenerating(true);
+      setError('');
+      try {
+        const summaryResult = await summarizeContent(content);
+        const tagsResult = await generateTags(content);
+        setSummary(summaryResult);
+        setSuggestedTags(tagsResult);
+        setTags(tagsResult.join(', '));
+      } catch (error) {
+        console.error(error);
+        setError('AI generation failed');
+      } finally {
+        setAiGenerating(false);
+      }
+    };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -92,6 +114,29 @@ export default function EditPostPage() {
                 onChange={e => setContent(e.target.value)}
               />
             </div>
+            <div className="flex gap-4 items-center">
+              <button
+                type="button"
+                onClick={handleAIGenerate}
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
+                disabled={aiGenerating || !content}
+              >
+                {aiGenerating ? "Generating..." : "AI Summarize & Tag"}
+              </button>
+              {summary && (
+                <span className="text-sm text-gray-400 italic">
+                  ✨ Summary ready below
+                </span>
+              )}
+            </div>
+
+            {/* Summary (optional display) */}
+            {summary && (
+              <div className="bg-white/10 text-white p-4 rounded border border-gray-700">
+                <p className="font-semibold mb-1 text-gray-300">Summary:</p>
+                <p className="text-gray-100">{summary}</p>
+              </div>
+            )}
 
             <div>
               <label className="block text-gray-300 mb-2">Category</label>
@@ -117,7 +162,13 @@ export default function EditPostPage() {
                 value={tags}
                 onChange={e => setTags(e.target.value)}
               />
+              {suggestedTags.length > 0 && (
+                <p className="text-sm text-green-300 mt-1">
+                  Suggested: {suggestedTags.join(', ')}
+                </p>
+              )}
             </div>
+            
 
             <div className="flex gap-4 pt-4">
               <button

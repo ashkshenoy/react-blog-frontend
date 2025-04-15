@@ -1,6 +1,6 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiInstance } from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import CommentsSection from './CommentsSection';
 
 export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner }) {
@@ -10,87 +10,86 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
     post.likes?.some(like => like.user?.username === currentUser)
   );
   const navigate = useNavigate();
+
   const getAuthorName = (author) => {
     if (!author) return 'Unknown';
     if (typeof author === 'string') return author;
     return author.username || 'Unknown';
   };
 
-  // Initialize likes state when post changes
-     // Update likes state when post changes
-     useEffect(() => {
-      if (post?.likes) {
-          setLikes(post.likes.length);
-          setHasLiked(post.likes.some(like => 
-              like.user?.username === currentUser
-          ));
-      }
+  useEffect(() => {
+    if (post?.likes) {
+      setLikes(post.likes.length);
+      setHasLiked(post.likes.some(like =>
+        like.user?.username === currentUser
+      ));
+    }
   }, [post, currentUser]);
 
   const handleLike = async () => {
     if (!currentUser) {
-        navigate('/login', { state: { from: window.location.pathname } });
-        return;
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
     }
 
     const token = localStorage.getItem('token');
     if (!token) {
-        navigate('/login', { state: { from: window.location.pathname } });
-        return;
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
     }
 
     const prevLikes = likes;
     const prevHasLiked = hasLiked;
 
     try {
-        // Use consistent request config format
-        const config = {
-            method: hasLiked ? 'DELETE' : 'POST',
-            url: `/posts/${post.id}/likes`,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        };
-
-        console.log('Making like request:', {
-            ...config,
-            token: token.substring(0, 20) + '...',
-            currentUser
-        });
-
-        const response = await apiInstance(config);
-
-        console.log('Like response:', response.data);
-
-        if (response.data) {
-            setLikes(response.data.totalLikes);
-            setHasLiked(response.data.hasLiked);
+      const config = {
+        method: hasLiked ? 'DELETE' : 'POST',
+        url: `/posts/${post.id}/likes`,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
+      };
+
+      const response = await apiInstance(config);
+      if (response.data) {
+        setLikes(response.data.totalLikes);
+        setHasLiked(response.data.hasLiked);
+      }
     } catch (error) {
-        setLikes(prevLikes);
-        setHasLiked(prevHasLiked);
-        
-        console.error('Like operation failed:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message,
-            headers: error.response?.headers
-        });
-        
-        if (error.response?.status === 403) {
-            if (error.response.data?.message?.includes('expired')) {
-                localStorage.removeItem('token');
-            }
-            navigate('/login', { state: { from: window.location.pathname } });
+      setLikes(prevLikes);
+      setHasLiked(prevHasLiked);
+      if (error.response?.status === 403) {
+        if (error.response.data?.message?.includes('expired')) {
+          localStorage.removeItem('token');
         }
+        navigate('/login', { state: { from: window.location.pathname } });
+      }
     }
-};
+  };
+
+  const truncateContent = (content, wordLimit = 100) => {
+    const words = content.split(/\s+/);
+    if (words.length <= wordLimit) return content;
+    return words.slice(0, wordLimit).join(' ') + '...';
+  };
+
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-2 text-white">{post.title}</h2>
-      <p className="text-gray-300 mb-4">{post.content}</p>
       
+      <p className="text-gray-300 mb-4">
+        {truncateContent(post.content)}
+        {post.content.split(/\s+/).length > 100 && (
+          <Link
+            to={`/posts/${post.id}`}
+            className="ml-2 text-blue-400 hover:underline"
+          >
+            Read more
+          </Link>
+        )}
+      </p>
+
       <div className="flex flex-wrap gap-2 mb-4">
         {post.category && (
           <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">

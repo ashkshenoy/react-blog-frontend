@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CreatePostPage from './pages/CreatePostPage';
 import EditPostPage from './pages/EditPostPage';
+import PostDetail from './pages/PostDetail';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
 import './index.css';
@@ -41,6 +42,7 @@ const App = () => (
                 </PrivateRoute>
               }
             />
+            <Route path="/posts/:id" element={<PostDetail />} />
           </Routes>
         </main>
       </div>
