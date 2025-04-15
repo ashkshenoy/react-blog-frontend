@@ -4,7 +4,7 @@ import PostCard from '../components/PostCard';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/maincss.css';
 import { summarizeContent } from "../api/aiService";
-import { motion, AnimatePresence } from 'framer-motion';
+
 
 export default function HomePage() {
   const [posts, setPosts] = useState([]);
@@ -113,29 +113,25 @@ export default function HomePage() {
 
   const PaginationControls = () => {
     return (
-      <div className="flex justify-center items-center gap-2 mt-8">
-        <button
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-4 py-2 text-gray-300 hover:text-white 
-                   transition-all duration-200 disabled:opacity-50
-                   hover:bg-white/10 rounded-lg"
-        >
-          Previous
-        </button>
-        <span className="text-gray-300">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 text-gray-300 hover:text-white 
-                   transition-all duration-200 disabled:opacity-50
-                   hover:bg-white/10 rounded-lg"
-        >
-          Next
-        </button>
-      </div>
+      <div className="flex justify-center items-center gap-3 mt-10">
+      <button
+        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+        disabled={currentPage === 1}
+        className="px-4 py-2 rounded-full text-gray-400 hover:text-white transition disabled:opacity-30 bg-white/5"
+      >
+        Previous
+      </button>
+      <span className="text-gray-300 text-sm">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+        disabled={currentPage === totalPages}
+        className="px-4 py-2 rounded-full text-gray-400 hover:text-white transition disabled:opacity-30 bg-white/5"
+      >
+        Next
+      </button>
+    </div>
     );
   };
 
@@ -211,6 +207,12 @@ export default function HomePage() {
     }
   };
 
+  // Check if current user is the author of the post
+  const isPostOwner = (postAuthor) => {
+    const authorName = typeof postAuthor === 'object' ? postAuthor?.username : postAuthor;
+    return currentUser === authorName;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen app-background">
@@ -247,94 +249,72 @@ export default function HomePage() {
     <div className="app-background min-h-screen py-12">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="glass-card p-8 mb-8 animate-fade-in rounded-xl">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 text-center">
-                Wonted Blogs – you are what you write, not what you read.
-              </h1>
-              {isAuthenticated && currentUser && (
-                <span className="text-gray-300 text-lg">
-                  Welcome, <span className="font-medium text-blue-400">{currentUser}</span>
-                </span>
-              )}
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={fetchData}
-                disabled={loading}
-                className="px-4 py-2.5 text-gray-300 hover:text-white 
-                         transition-all duration-200 flex items-center gap-2
-                         hover:bg-white/10 rounded-lg"
-              >
-                <svg className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                {loading ? 'Refreshing...' : 'Refresh'}
-              </button>
-            </div>
-          </div>
-        </div>
-
+        <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 mb-10 shadow-sm border border-white/10 transition-all">
+  <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+    <div className="flex flex-col sm:flex-row items-center gap-4">
+      <h1 className="text-3xl sm:text-4xl font-semibold text-gray-100 text-center">
+        Wonted Blogs — You are what you write.
+      </h1>
+      {isAuthenticated && currentUser && (
+        <span className="text-gray-400 text-lg mt-2 sm:mt-0">
+          Welcome back, <span className="font-medium text-blue-300">{currentUser}</span>
+        </span>
+      )}
+    </div>
+    <button
+      onClick={fetchData}
+      disabled={loading}
+      className="px-4 py-2.5 rounded-full border border-gray-500 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition"
+    >
+      {loading ? (
+        <svg className="h-4 w-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      ) : (
+        'Refresh'
+      )}
+    </button>
+  </div>
+</div>
         {/* Filters */}
-        <div className="filters mb-8 flex justify-between">
-          <select onChange={handleCategoryChange} value={selectedCategory}
-            className="text-lg text-gray-300 bg-transparent border-2 px-6 py-2 rounded-md">
-            <option value="">All Categories</option>
-            {categories.map((cat, index) => (
-              <option key={index} value={cat}>{cat}</option>
-            ))}
-          </select>
-          <select onChange={handleTagChange} value={selectedTag}
-            className="text-lg text-gray-300 bg-transparent border-2 px-6 py-2 rounded-md">
-            <option value="">All Tags</option>
-            {tags.map((tag, index) => (
-              <option key={index} value={tag}>{tag}</option>
-            ))}
-          </select>
-        </div>
+        <div className="flex justify-between items-center mb-10 gap-4">
+  <select
+    onChange={handleCategoryChange}
+    value={selectedCategory}
+    className="px-5 py-2 rounded-full bg-white/10 text-sm text-gray-200 border border-white/20 focus:outline-none"
+  >
+    <option value="">All Categories</option>
+    {categories.map((cat, idx) => (
+      <option key={idx} value={cat}>{cat}</option>
+    ))}
+  </select>
+  <button
+    onClick={() => navigate("/create")}
+    className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-full shadow transition"
+  >
+    + Create New Blog
+  </button>
+  <select
+    onChange={handleTagChange}
+    value={selectedTag}
+    className="px-5 py-2 rounded-full bg-white/10 text-sm text-gray-200 border border-white/20 focus:outline-none"
+  >
+    <option value="">All Tags</option>
+    {tags.map((tag, idx) => (
+      <option key={idx} value={tag}>{tag}</option>
+    ))}
+  </select>
+</div>
 
         {/* Posts */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {getCurrentPosts().map((post) => (
-            <div key={post.id} className="relative">
-              <PostCard post={post} onDelete={deletePost} onEdit={handleEdit} />
-              <div className="flex justify-between mt-2">
-                <button
-                  onClick={() => handleSummaryToggle(post.id, post.content)}
-                  className="text-sm text-blue-500 hover:text-blue-400"
-                >
-                  {summaries[post.id] ? 'Hide Summary' : 'Show Summary'}
-                </button>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(post.id)}
-                    className="text-sm text-yellow-500 hover:text-yellow-400"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deletePost(post.id)}
-                    className="text-sm text-red-500 hover:text-red-400"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <AnimatePresence>
-                {summaries[post.id] && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="mt-4 text-sm text-gray-300"
-                  >
-                    {summaries[post.id]}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+           <div key={post.id} className="flex">
+              <PostCard post={post} onDelete={deletePost} onEdit={handleEdit} 
+              currentUser={currentUser} 
+              isOwner={isPostOwner(post.author)}  />
+              
             </div>
           ))}
         </div>

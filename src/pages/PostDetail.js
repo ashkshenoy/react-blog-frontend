@@ -1,13 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiInstance } from '../api/axios';
-
+import { motion, AnimatePresence } from 'framer-motion';
+import { summarizeContent } from "../api/aiService";
+// Assuming you have a function to generate summary
 export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [summary, setSummary] = useState('');
+  useEffect(() => {
+    const getSummary = async () => {
+      if (showSummary && post?.content) {
+        const result = await summarizeContent(post.content);
+        setSummary(result);
+      }
+    };
+    getSummary();
+  }, [showSummary, post]);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -63,7 +76,30 @@ export default function PostDetail() {
             ))}
           </div>
         </div>
+        <div className="mt-6">
+            
 
+            <button
+                onClick={() => setShowSummary((prev) => !prev)}
+                className="text-blue-400 hover:text-blue-300 text-sm"
+                >
+                {showSummary ? "Hide Summary" : "Show Summary"}
+                </button>
+
+                <AnimatePresence>
+                {showSummary && (
+                    <motion.div
+                    layout
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 text-gray-300 text-sm overflow-hidden"
+                    >
+                    {summary}
+                    </motion.div>
+                )}
+                </AnimatePresence>
+            </div>
         <div className="flex justify-between">
           <button
             onClick={() => navigate(-1)}

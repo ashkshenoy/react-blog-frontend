@@ -13,14 +13,7 @@ const NavBar = () => {
             <Link to="/" className="text-white font-bold text-xl">
               Blog
             </Link>
-            {currentUser && (
-              <Link 
-                to="/create" 
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                Create Post
-              </Link>
-            )}
+            
           </div>
 
           {/* Right side */}

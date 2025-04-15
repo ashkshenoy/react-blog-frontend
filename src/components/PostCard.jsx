@@ -6,6 +6,8 @@ import CommentsSection from './CommentsSection';
 export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner }) {
   const [showComments, setShowComments] = useState(false);
   const [likes, setLikes] = useState(post.likes?.length || 0);
+   const [summaries, setSummaries] = useState({});
+    const [loadingSummaries, setLoadingSummaries] = useState({});
   const [hasLiked, setHasLiked] = useState(
     post.likes?.some(like => like.user?.username === currentUser)
   );
@@ -18,6 +20,9 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
   };
 
   useEffect(() => {
+  console.log('Current user:', currentUser);
+  console.log('Post likes:', post?.likes);
+
     if (post?.likes) {
       setLikes(post.likes.length);
       setHasLiked(post.likes.some(like =>
@@ -31,16 +36,16 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
       navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
-
+  
     const token = localStorage.getItem('token');
     if (!token) {
       navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
-
+  
     const prevLikes = likes;
     const prevHasLiked = hasLiked;
-
+  
     try {
       const config = {
         method: hasLiked ? 'DELETE' : 'POST',
@@ -50,7 +55,7 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
           'Content-Type': 'application/json'
         }
       };
-
+  
       const response = await apiInstance(config);
       if (response.data) {
         setLikes(response.data.totalLikes);
@@ -67,29 +72,30 @@ export default function PostCard({ post, currentUser, onDelete, onEdit, isOwner 
       }
     }
   };
+  
 
-  const truncateContent = (content, wordLimit = 100) => {
+  const truncateContent = (content, wordLimit = 30) => {
     const words = content.split(/\s+/);
     if (words.length <= wordLimit) return content;
     return words.slice(0, wordLimit).join(' ') + '...';
   };
 
   return (
-    <div className="p-6">
+    <div className="flex flex-col justify-between bg-white/5 rounded-2xl shadow-xl h-full p-6">
       <h2 className="text-xl font-semibold mb-2 text-white">{post.title}</h2>
       
       <p className="text-gray-300 mb-4">
-        {truncateContent(post.content)}
-        {post.content.split(/\s+/).length > 100 && (
-          <Link
-            to={`/posts/${post.id}`}
-            className="ml-2 text-blue-400 hover:underline"
-          >
-            Read more
-          </Link>
-        )}
-      </p>
-
+      {truncateContent(post.content)}
+    </p>
+    
+    {post?.id && (
+  <Link
+  to={`/posts/${post.id}`}
+  className="ml-2 text-blue-400 hover:underline text-sm"
+>
+  Read post →
+</Link>
+)}
       <div className="flex flex-wrap gap-2 mb-4">
         {post.category && (
           <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">
