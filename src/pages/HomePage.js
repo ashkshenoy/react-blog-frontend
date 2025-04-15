@@ -26,6 +26,9 @@ export default function HomePage() {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
+  document.title = "Wonted Blogs";
+}, []);
+  useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const token = localStorage.getItem("token");
 
@@ -291,8 +294,8 @@ export default function HomePage() {
   </select>
   <button
     onClick={() => navigate("/create")}
-    className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-full shadow transition"
-  >
+    className="px-6 py-2 rounded-full border border-blue-400 text-blue-300 hover:bg-blue-500/10 hover:text-white transition text-sm"
+>  
     + Create New Blog
   </button>
   <select

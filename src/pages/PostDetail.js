@@ -12,6 +12,11 @@ export default function PostDetail() {
   const [currentUser, setCurrentUser] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState('');
+
+  useEffect(() => {
+  document.title = "Post Details";
+}, []);
+
   useEffect(() => {
     const getSummary = async () => {
       if (showSummary && post?.content) {

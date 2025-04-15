@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/axios';
 
@@ -16,6 +16,9 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  useEffect(() => {
+    document.title = "Wonted Blogs - Register Page";
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

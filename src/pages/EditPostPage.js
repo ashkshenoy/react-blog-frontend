@@ -16,7 +16,9 @@ export default function EditPostPage() {
   const [summary, setSummary] = useState('');
   const [suggestedTags, setSuggestedTags] = useState([]);
 
-
+  useEffect(() => {
+    document.title = "Edit Post";
+  }, []);
 
   useEffect(() => {
     const fetchPost = async () => {

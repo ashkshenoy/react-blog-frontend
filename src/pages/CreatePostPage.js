@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import  {apiInstance} from '../api/axios';
 import { summarizeContent, generateTags } from "../api/aiService";
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,9 @@ export default function CreatePostPage() {
   const [suggestedTags, setSuggestedTags] = useState([]);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.title = "Create Post";
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
