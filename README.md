@@ -77,13 +77,31 @@ npm start
 
 ---
 
-## 🧠 AI Integration
+🧠 AI Integration
 
-The backend integrates with a **Python microservice** to assist with AI-generated content suggestions. This was particularly useful in:
-- Summarizing long posts
-- Generating tags
+The backend connects to a Python-based FastAPI microservice that enhances blogging productivity using NLP techniques.
+Features provided:
+
+    ✂️ Summarization — Condenses long content into 1–2 key sentences.
+
+    🏷️ Tag Generation — Suggests relevant tags using spaCy (Named Entity Recognition + POS tagging).
+
+Tech Stack:
+
+    FastAPI + spaCy + NLTK
+    Deployed separately, CORS-enabled for React frontend
+    Endpoints:
+        POST /summarize
+        POST /generate-tags
+        POST /generate
+
+    🚀 Note: The microservice runs independently and should be started before interacting with AI features in the blog.
+
+To start the service:
+  uvicorn main:app --reload
 
 ---
+
 
 ## 🧪 Testing Overview
 
