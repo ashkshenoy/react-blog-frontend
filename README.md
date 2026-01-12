@@ -172,4 +172,12 @@ Feel free to fork, contribute, or take inspiration!
 
 ---
 
+<img width="1376" height="894" alt="image" src="https://github.com/user-attachments/assets/bd1400ad-d6fe-443f-82cc-62eae4c11445" />
+
+<img width="1390" height="901" alt="image" src="https://github.com/user-attachments/assets/bd62d8b7-9974-431f-b148-b542750e570a" />
+
+<img width="1382" height="943" alt="image" src="https://github.com/user-attachments/assets/7c243e95-7a13-4c90-800e-a324f784b76b" />
+
+<img width="1348" height="526" alt="image" src="https://github.com/user-attachments/assets/73b7a02e-6129-47f2-8938-dc9de2c62002" />
+
 
